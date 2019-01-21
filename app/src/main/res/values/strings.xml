@@ -3,4 +3,5 @@
     <string name="start_progress">Запустить процесс</string>
     <string name="loading">Загрузка ...</string>
     <string name="ready">Готово</string>
+    <string name="error">Ошибка</string>
 </resources>

@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private Button mStartProgressButton;
     private ProgressBar mProgressBar;
     private TextView mProgressText;
+    private Loader mLoader;
+    private boolean mIsLoaderCreated = false;
     private static final int LOADER_ID = 111;
 
     @Override
@@ -25,15 +27,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mProgressBar = findViewById(R.id.progressBar);
         mProgressText = findViewById(R.id.tvProgress);
 
-        Bundle bndl = new Bundle();
-        getLoaderManager().initLoader(LOADER_ID, bndl, this).forceLoad();
+        initLoader();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    private void initLoader() {
+        if (getLoaderManager().getLoader(LOADER_ID) != null) {
+            setLoaderIsStartedState();
+        }
 
-        mProgressBar.setVisibility(ProgressBar.GONE);
+        mLoader = getLoaderManager().initLoader(LOADER_ID, null, this);
+    }
+
+    private void setLoaderIsStartedState() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mStartProgressButton.setEnabled(false);
+        mProgressText.setText(R.string.loading);
     }
 
     @Override
@@ -43,7 +51,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mStartProgressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setLoaderIsStartedState();
 
+                if (mLoader.isStarted()) {
+                    mLoader = getLoaderManager().restartLoader(LOADER_ID, null, MainActivity.this);
+                }
+
+                mLoader.forceLoad();
             }
         });
     }
@@ -54,10 +68,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if (id == LOADER_ID) {
             loader = new ProgressLoader(this);
-
-            mProgressBar.setVisibility(View.VISIBLE);
-            mStartProgressButton.setEnabled(false);
-            mProgressText.setText(R.string.loading);
         }
 
         return loader;
@@ -72,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<Integer> loader) {
-        int k = 0;
-        k = k + 1;
+        mProgressBar.setVisibility(View.GONE);
+        mStartProgressButton.setEnabled(true);
+        mProgressText.setText(R.string.error);
     }
 }
